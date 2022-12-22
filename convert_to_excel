@@ -1,0 +1,35 @@
+<?php
+include('dbconfig.php');
+
+
+$page_num = 100;
+$a = 0;
+
+//number of total pages
+$query2 = "select * from student";
+$result2 = mysqli_query($dbcon, $query2);
+$total_records = mysqli_num_rows($result2);
+$total_pages = ceil($total_records / $page_num);
+
+
+$fields = array('student id', 'student full name', 'mother name', 'gender', 'age', 'study year', 'email', 'address', 'phone number');
+$filename = 'members';
+$excelData = implode("\t", array_values($fields))."\n";
+header("Content-Type: application/vnd.ms-excel");
+header("Content-Disposition:attachment;filename=members.xls");
+
+for ($i = 0; $i < $total_pages - 1; $i++) {
+    $query = "select * from student limit $page_num offset $a ";
+    $result = mysqli_query($dbcon, $query);
+    // Output each row of the data 
+    while ($row = mysqli_fetch_array($result)) {
+        $lineData = array($row['student_id'], "".$row['first_name']." ".$row['father_name']." ".$row['last_name']."", $row['mother_name'],($row['gender']) == 0?'male':'female', $row['age'], $row['study_year'], $row['email'], $row['address'], $row['phone__number']);
+        $excelData .= implode("\t", array_values($lineData)) . "\n";
+    }
+    $a+=100;
+    echo $excelData;
+    $excelData = '';
+}
+
+
+?>
